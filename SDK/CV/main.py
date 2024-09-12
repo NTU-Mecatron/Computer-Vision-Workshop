@@ -2,7 +2,6 @@
 import cv2
 import torch
 import ultralytics
-from torch.backends import cudnn
 import serial
 
 
@@ -15,10 +14,10 @@ class CVModel:
 
     def set_model(self):
         self.model = ultralytics.YOLO(self.yolo_model_name)
-        cudnn.benchmark = True
+        torch.backends.cudnn.benchmark = True
     
     def predict(self, frame):
-        self.results = self.model.predict(source=frame, conf=0.6, iou=0.5)[0]
+        self.results = self.model.predict(source=frame, verbose=False, device="cpu", conf=0.6, iou=0.5)[0]
 
     def inference_locations(self):
         if self.results is None:
@@ -84,7 +83,7 @@ class ObjectTracker:
     def __init__(self):
         self.cvmodel = None
         self.cvvisualizer = None
-        self.serial_comms = SerialComms("COM3")  # Adjust COM port as necessary
+        self.serial_comms = None
         self.cap_frame = None
         self.mid_w = self.mid_h = 0
         self.x_req = self.y_req = 0
@@ -92,6 +91,9 @@ class ObjectTracker:
 
     def set_cvmodel(self, cvmodel: CVModel):
         self.cvmodel = cvmodel
+    
+    # def set_cvmodel(self, cvmodel: CVModel):
+    #     self.cvmodel = cvmodel
 
     def set_cvvisualizer(self, cvvisualizer: CvVisualizer):
         self.cvvisualizer = cvvisualizer
@@ -174,19 +176,17 @@ class ObjectTracker:
         self.serial_comms.sendSerial(req_str)
 
 
-
 def main():
     cvmodel = CVModel("SDK/CV/models/yolov8m-face.pt")
     cvmodel.set_model()
 
-    cvvisualizer = CvVisualizer(1)  # Use 0 for default camera; adjust as necessary
+    cvvisualizer = CvVisualizer(camera_stream_path=0)  # Use 0 for default camera; adjust as necessary
 
     objectTracker = ObjectTracker()
     objectTracker.set_cvmodel(cvmodel)
     objectTracker.set_cvvisualizer(cvvisualizer)
 
-    serial_path = "/dev/ttyUSB0"  # Adjust as necessary
-    objectTracker.serial_comms = SerialComms(serial_path)
+    objectTracker.serial_comms = SerialComms(serial_path="/dev/ttyUSB0", baud_rate=115200)
     # objectTracker.serial_comms.openSerial()
 
     objectTracker.run()
