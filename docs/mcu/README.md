@@ -1,5 +1,3 @@
-Here’s the documentation for your Arduino code, formatted in Markdown:
-
 # Arduino Servo Control
 
 This project demonstrates how to control two servo motors using an Arduino based on serial commands. The commands are sent via serial communication and indicate the position of the motors relative to a center point.
