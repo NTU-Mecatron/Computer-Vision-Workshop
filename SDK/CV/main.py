@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+
 import cv2
 import torch
 import ultralytics
@@ -17,7 +18,7 @@ class CVModel:
         torch.backends.cudnn.benchmark = True
     
     def predict(self, frame):
-        self.results = self.model.predict(source=frame, verbose=False, device="cpu", conf=0.6, iou=0.5)[0]
+        self.results = self.model.predict(source=frame, verbose=False, conf=0.6, iou=0.5)[0]
 
     def inference_locations(self):
         if self.results is None:
@@ -68,14 +69,21 @@ class SerialComms:
         self.ser = None
 
     def openSerial(self):
-        self.ser = serial.Serial(self.serial_path, self.baud_rate)
+        try:
+            self.ser = serial.Serial(self.serial_path, self.baud_rate)
+        except:
+            pass
     
     def closeSerial(self):
         if self.ser and self.ser.is_open:
             self.ser.close()
     
     def sendSerial(self, msg: str):
+        if self.ser is None:
+            self.openSerial()
         if self.ser and self.ser.is_open:
+            if not (msg.endswith("\n")):
+                msg += "\n"
             self.ser.write(msg.encode())
 
 
@@ -91,9 +99,6 @@ class ObjectTracker:
 
     def set_cvmodel(self, cvmodel: CVModel):
         self.cvmodel = cvmodel
-    
-    # def set_cvmodel(self, cvmodel: CVModel):
-    #     self.cvmodel = cvmodel
 
     def set_cvvisualizer(self, cvvisualizer: CvVisualizer):
         self.cvvisualizer = cvvisualizer
@@ -112,6 +117,7 @@ class ObjectTracker:
             self.h = self.cvvisualizer.h
             self.mid_w = self.cvvisualizer.mid_w
             self.mid_h = self.cvvisualizer.mid_h
+            return True
 
     def closeStream(self):
         if self.cvvisualizer:
@@ -158,10 +164,16 @@ class ObjectTracker:
         # Draw center point and tracking line
         self.proc_frame = cv2.circle(self.proc_frame, (self.mid_w, self.mid_h), 1, (255, 0, 255), 3)
         
-
     def getObjectLocationOnFrame(self):
-        # Placeholder for actual object location logic
-        return 250, 250
+        if self.cvmodel.results_tensor is not None and len(self.cvmodel.results_tensor) > 0:
+            # Take the first detected object's center
+            box = self.cvmodel.results_tensor[0]  # Assuming we are interested in the first detected object
+            x_center, y_center, _, _, _, _ = box
+            # Convert normalized coordinates to pixel values
+            x_center = x_center * self.w
+            y_center = y_center * self.h
+            return int(x_center), int(y_center)
+        return self.mid_w, self.mid_h  # Return the center of the frame if no object is detected
 
     def calcOffsetFromCenterOfFrame(self, x, y):
         return (self.mid_w - x), (self.mid_h - y)
@@ -171,8 +183,20 @@ class ObjectTracker:
         self.x_req, self.y_req = self.calcOffsetFromCenterOfFrame(x, y)
         self.sendTrackingReq()
 
+    @staticmethod
+    def __get_sign(x: int):
+        if (x == 0):
+            return "0"
+        elif (x > 0):
+            return "+"
+        else:
+            return "-"
+
     def sendTrackingReq(self):
-        req_str = f"x{self.x_req} y{self.y_req}\n"
+        # req_str = f"x{self.x_req} y{self.y_req}\n"
+        
+        req_str = f"x{self.__get_sign(self.x_req)} y{self.__get_sign(self.y_req)}"
+        print(f"move {req_str}")
         self.serial_comms.sendSerial(req_str)
 
 
@@ -180,7 +204,7 @@ def main():
     cvmodel = CVModel("SDK/CV/models/yolov8m-face.pt")
     cvmodel.set_model()
 
-    cvvisualizer = CvVisualizer(camera_stream_path=0)  # Use 0 for default camera; adjust as necessary
+    cvvisualizer = CvVisualizer(camera_stream_path=1)
 
     objectTracker = ObjectTracker()
     objectTracker.set_cvmodel(cvmodel)
