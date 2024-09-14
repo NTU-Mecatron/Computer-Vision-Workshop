@@ -9,6 +9,7 @@
  * 
  */
 
+#include <Arduino.h>
 #include <Servo.h>
 
 #define servoXPin 9
