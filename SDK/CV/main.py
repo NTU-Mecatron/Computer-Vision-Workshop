@@ -181,6 +181,7 @@ class ObjectTracker:
     def track(self):
         x, y = self.getObjectLocationOnFrame()
         self.x_req, self.y_req = self.calcOffsetFromCenterOfFrame(x, y)
+        self.modify_track()
         self.sendTrackingReq()
 
     @staticmethod
@@ -191,9 +192,16 @@ class ObjectTracker:
             return "+"
         else:
             return "-"
-
+    
+    def modify_track(self):
+        if (abs(self.x_req) < 0.2 * self.mid_w):
+            self.x_req = 0
+        if (abs(self.y_req) < 0.2 * self.mid_h):
+            self.y_req = 0
+        
     def sendTrackingReq(self):
         # req_str = f"x{self.x_req} y{self.y_req}\n"
+        self.y_req *= -1
         
         req_str = f"x{self.__get_sign(self.x_req)} y{self.__get_sign(self.y_req)}"
         print(f"move {req_str}")
@@ -201,16 +209,18 @@ class ObjectTracker:
 
 
 def main():
-    cvmodel = CVModel("SDK/CV/models/yolov8m-face.pt")
+    cvmodel = CVModel("SDK/CV/models/yolov8n-face.pt")
+    # cvmodel = CVModel("SDK/CV/models/ball_model.pt")
+    # cvmodel = CVModel("SDK/CV/models/ball_model.pt")
     cvmodel.set_model()
 
-    cvvisualizer = CvVisualizer(camera_stream_path=1)
+    cvvisualizer = CvVisualizer(camera_stream_path=0)
 
     objectTracker = ObjectTracker()
     objectTracker.set_cvmodel(cvmodel)
     objectTracker.set_cvvisualizer(cvvisualizer)
 
-    objectTracker.serial_comms = SerialComms(serial_path="/dev/ttyUSB0", baud_rate=115200)
+    objectTracker.serial_comms = SerialComms(serial_path="COM7", baud_rate=115200)
     # objectTracker.serial_comms.openSerial()
 
     objectTracker.run()
