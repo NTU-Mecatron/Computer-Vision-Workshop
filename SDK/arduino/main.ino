@@ -1,5 +1,5 @@
 /**
- * @file main.cpp
+ * @file main.ino
  * @author Scott CJX (scottcjx.w@gmail.com)
  * @brief 
  * @version 0.1
@@ -20,6 +20,13 @@ Servo servoY;
 // Variables to store the received x and y coordinates
 int x_req = 0;
 int y_req = 0;
+// Global variables to keep track of current servo angles
+int currentXAngle = 90; // Start at neutral position
+int currentYAngle = 90; // Start at neutral position
+
+// Define step sizes
+const int x_step = 2; // Step size for x-axis
+const int y_step = 2; // Step size for y-axis
 
 // Function to parse the incoming data and set servo positions
 void processSerialData(String data) {
@@ -30,26 +37,35 @@ void processSerialData(String data) {
         char xSign = data.charAt(xIndex);
         char ySign = data.charAt(yIndex);
 
-        // Define default angles for positive, negative, and zero
-        int xAngle = 90; // Neutral position
-        int yAngle = 90; // Neutral position
-
-        // Map signs to servo angles
+        // Update the x angle based on the sign
         if (xSign == '+') {
-            xAngle = 180; // Maximum position
+            currentXAngle += x_step;
+            if (currentXAngle > 180) {
+                currentXAngle = 180; // Limit to max angle
+            }
         } else if (xSign == '-') {
-            xAngle = 0;   // Minimum position
+            currentXAngle -= x_step;
+            if (currentXAngle < 0) {
+                currentXAngle = 0; // Limit to min angle
+            }
         }
         
+        // Update the y angle based on the sign
         if (ySign == '+') {
-            yAngle = 180; // Maximum position
+            currentYAngle += y_step;
+            if (currentYAngle > 180) {
+                currentYAngle = 180; // Limit to max angle
+            }
         } else if (ySign == '-') {
-            yAngle = 0;   // Minimum position
+            currentYAngle -= y_step;
+            if (currentYAngle < 0) {
+                currentYAngle = 0; // Limit to min angle
+            }
         }
         
-        // Move the servos to the desired positions
-        servoX.write(xAngle);
-        servoY.write(yAngle);
+        // Move the servos to the updated positions
+        servoX.write(currentXAngle);
+        servoY.write(currentYAngle);
     }
 }
 
