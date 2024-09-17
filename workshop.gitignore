@@ -3,5 +3,5 @@
 *venv*
 .mkdocs.yml
 
-*/arduino/*
-*/platformio/*
+*arduino/*
+*platformio/*
