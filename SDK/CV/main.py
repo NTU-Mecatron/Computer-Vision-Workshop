@@ -1,9 +1,22 @@
 #!/usr/bin/python3
-
 import cv2
 import torch
 import ultralytics
 import serial
+
+
+confs = {
+    "yolo_model": "models/yolov8n-face.pt",
+    # "yolo_model": "models/yolov8m-face.pt",
+    # "yolo_model": "models/ball_model-face.pt",
+    # "yolo_model": "models/minion-face.pt",
+
+    # "serial_stream_path": "COM1",
+    # "serial_stream_path": "/dev/ttyACM0",
+
+    "serial_stream_path": "/dev/ttyUSB0",
+    "camera_stream_path": 1200
+}
 
 
 class CVModel:
@@ -40,6 +53,9 @@ class CvVisualizer:
         self.cap = cv2.VideoCapture(self.camera_stream_path)
         self.cap_frame = None
         self.h = self.w = self.mid_h = self.mid_w = 0
+    
+    def get_stream(self):
+        pass
 
     def readStream(self):
         ret, self.cap_frame = self.cap.read()
@@ -209,20 +225,16 @@ class ObjectTracker:
 
 
 def main():
-    cvmodel = CVModel("SDK/CV/models/yolov8n-face.pt")
-    # cvmodel = CVModel("SDK/CV/models/ball_model.pt")
-    # cvmodel = CVModel("SDK/CV/models/ball_model.pt")
+    cvmodel = CVModel(confs["yolo_model"])
     cvmodel.set_model()
 
-    cvvisualizer = CvVisualizer(camera_stream_path=0)
+    cvvisualizer = CvVisualizer(camera_stream_path=confs["camera_stream_path"])
 
     objectTracker = ObjectTracker()
     objectTracker.set_cvmodel(cvmodel)
     objectTracker.set_cvvisualizer(cvvisualizer)
 
-    objectTracker.serial_comms = SerialComms(serial_path="COM7", baud_rate=115200)
-    # objectTracker.serial_comms.openSerial()
-
+    objectTracker.serial_comms = SerialComms(serial_path=confs["serial_stream_path"], baud_rate=115200)
     objectTracker.run()
 
 
