@@ -1,3 +1,11 @@
 *venv/*
 site/
 
+.github/
+.vscode/
+*venv*
+.mkdocs.yml
+
+arduino/*
+platformio/*
+
