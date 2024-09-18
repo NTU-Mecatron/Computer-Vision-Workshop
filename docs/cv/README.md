@@ -17,6 +17,9 @@ Install the required Python packages using pip:
     - `sh scripts/installation.sh`
 - for windows 
     - run `installation.bat` in `scripts` folder
+    - If the virtual environment is not activated in VS Code, change to the `scripts` directory, paste the command into command prompt
+    - `venv\Scripts\activate` followed by `cd .. & pip install -r SDK/requirements.txt`
+    - Just type `code .` to open VS Code from command prompt
 
 ## Code Overview
 
