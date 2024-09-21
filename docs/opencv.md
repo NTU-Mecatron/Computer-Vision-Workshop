@@ -9,15 +9,6 @@ This project is an object tracking system that uses a YOLO (You Only Look Once) 
 - `ultralytics`
 - `serial`
 
-## Installation
-
-Install the required Python packages using pip:
-
-- for mac/ linux
-    - `sh scripts/installation.sh`
-- for windows 
-    - run `installation.bat` in `scripts` folder
-
 ## Code Overview
 
 ### Classes

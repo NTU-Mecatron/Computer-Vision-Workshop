@@ -1,0 +1,7 @@
+﻿opencv-python
+pyserial
+torch
+ultralytics
+cv2_enumerate_cameras
+dill
+omegaconf

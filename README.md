@@ -10,14 +10,14 @@ Participants will be using a capable computer to run object detection via comput
 The aim of this will be for the camera to detect and "track" an object, moving the camera to have the object at the center of its frame.
 
 
-## Components
+## Steps
 
-1. Hook up
+1. Hook up the hardware.
 2. Computer running computer vision code
 3. Arduino controlloing gimbal camera.
 
 
 ## Detailed Documentation
 
-- [Arudino code](./mcu)
-- [OpenCV code](./cv)
+- [Arduino code](./docs/mcu.md)
+- [OpenCV code](./docs/opencv.md)

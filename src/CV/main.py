@@ -1,21 +1,20 @@
-#!/usr/bin/python3
 import cv2
 import torch
-import ultralytics
+from ultralytics import YOLO
 import serial
 
 
 confs = {
-    "yolo_model": "models/yolov8n-face.pt",
-    # "yolo_model": "models/yolov8m-face.pt",
-    # "yolo_model": "models/ball_model-face.pt",
-    # "yolo_model": "models/minion-face.pt",
+    "yolo_model": "src/CV/models/yolov8n-face.pt",
+    # "yolo_model": "src/CV/models/yolov8m-face.pt",
+    # "yolo_model": "src/CV/models/ball_model.pt",
+    # "yolo_model": "src/CV/models/minion.pt",
 
-    # "serial_stream_path": "COM1",
-    # "serial_stream_path": "/dev/ttyACM0",
+    # "mcu_port": "COM1",
+    # "mcu_port": "/dev/ttyACM0",
 
-    "serial_stream_path": "/dev/ttyUSB0",
-    "camera_stream_path": 1200
+    "mcu_port": "/dev/ttyUSB0",
+    "camera_port": 0
 }
 
 
@@ -27,7 +26,7 @@ class CVModel:
         self.results_tensor = None
 
     def set_model(self):
-        self.model = ultralytics.YOLO(self.yolo_model_name)
+        self.model = YOLO(self.yolo_model_name)
         torch.backends.cudnn.benchmark = True
     
     def predict(self, frame):
@@ -48,9 +47,9 @@ class CVModel:
 
 
 class CvVisualizer:
-    def __init__(self, camera_stream_path):
-        self.camera_stream_path = camera_stream_path
-        self.cap = cv2.VideoCapture(self.camera_stream_path)
+    def __init__(self, camera_port):
+        self.camera_port = camera_port
+        self.cap = cv2.VideoCapture(self.camera_port)
         self.cap_frame = None
         self.h = self.w = self.mid_h = self.mid_w = 0
     
@@ -228,13 +227,13 @@ def main():
     cvmodel = CVModel(confs["yolo_model"])
     cvmodel.set_model()
 
-    cvvisualizer = CvVisualizer(camera_stream_path=confs["camera_stream_path"])
+    cvvisualizer = CvVisualizer(camera_port=confs["camera_port"])
 
     objectTracker = ObjectTracker()
     objectTracker.set_cvmodel(cvmodel)
     objectTracker.set_cvvisualizer(cvvisualizer)
 
-    objectTracker.serial_comms = SerialComms(serial_path=confs["serial_stream_path"], baud_rate=115200)
+    objectTracker.serial_comms = SerialComms(serial_path=confs["mcu_port"], baud_rate=115200)
     objectTracker.run()
 
 
