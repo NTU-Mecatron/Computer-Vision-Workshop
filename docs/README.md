@@ -32,8 +32,8 @@ Rushdon
 
 ### Software Development: 
 [Scott*](https://github.com/scott-cjx),
-[Luc*](https://github.com/lucvt001)
-[Wei Ming](https://github.com/Alvin0523)
+[Luc*](https://github.com/lucvt001),
+[Wei Ming](https://github.com/Alvin0523),
 [Brian](https://github.com/Thinkminator)
 
 > \* Head of development for respective category
